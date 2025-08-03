@@ -15,7 +15,9 @@ app.get('/', (req, res) => {
 app.listen(process.env.PORT || 3000, () => {
   console.log('Server running...');
 });
-
+setInterval(()=>{
+console.log("running")
+},3000)
 // Bot logic
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
