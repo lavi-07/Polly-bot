@@ -10,13 +10,12 @@ const bot = new TelegramBot(token, { polling: true });
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
 
-  // ✅ This is your MEGA file link with decryption key included
-  const videoLink = "https://mega.nz/file/mQ9DnLbI#Gfilu_zaRyYc9_qR4xlqHDPq39KyLqJSfQplT_wmTLU";
+  // ✅ This is your MEGA file link with decryption key include
 
   // ✅ Message with inline download button
-  bot.sendVideo(chatId,videoLink).catch((err)=>{
-    console.log("failed to send",err)
-  })
+ bot.sendMessage(chatId,"i got you").then((res)=>{
+  console.log(chatId)
+ })
   
 });
 
