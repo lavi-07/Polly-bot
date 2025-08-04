@@ -19,6 +19,25 @@ app.listen(process.env.PORT || 3000, () => {
 });
 
 // Bot logic
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+
+  bot.sendMessage(chatId, `
+👋 *Welcome to MovieBot!*
+
+🎬 You can search for any movie by typing its name below.
+
+📝 *Example:*  
+\`Majhail\`  
+\`Sardaar Ji\`  
+\`Saunkan Saunkne 2\`
+
+🔍 Just send the title, and I’ll find it for you!
+  `, {
+    parse_mode: "Markdown"
+  });
+});
+
 
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
@@ -53,7 +72,7 @@ bot.on("callback_query",(query)=>{
   const video=data.find(item=>item.title === chossenTi)
   if (video.url) {
     bot.sendVideo(chatId, video.url,{
-      caption:`${video.title}
+      caption:`${video.title} ${video.year}
       ⚠️ *Note:* This video will auto-delete in *1 minute*.
 
 📩 Forward it to any chat to save it permanently.`
