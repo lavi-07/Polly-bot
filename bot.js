@@ -36,35 +36,34 @@ bot.onText(/\/start/, (msg) => {
   `, {
     parse_mode: "Markdown"
   });
-  bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
-    if(msg.video){
-      console.log(msg.video.file_id)
-    }else{
-      const found = data.filter(item => item.title.includes(msg.text)
-      );
-      if(found.length !== 0){
-      const keybord =found.map(item=>[{text:item.title,callback_data: item.title}])
-      bot.sendMessage(chatId, "Your Movies LIst", {
-        reply_markup: {
-          inline_keyboard: keybord
-        }
-      });}else{
-        bot.sendMessage(chatId, `
-  ❌ *No Results Found*
-  ──────────────
-  🔍 Please check your spelling or try again.
   
-  📝 Make sure you typed the title correctly, just like it appears on Google.
-  `);
-  
-      }
-    }
-    
-    
-  });
 });
+bot.on('message', (msg) => {
+  if(msg.text !="/start"){
+  const chatId = msg.chat.id;
+  if(msg.video){
+    console.log(msg.video.file_id)
+  }else{
+    const found = data.filter(item => item.title.includes(msg.text)
+    );
+    if(found.length !== 0){
+    const keybord =found.map(item=>[{text:item.title,callback_data: item.title}])
+    bot.sendMessage(chatId, "Your Movies LIst", {
+      reply_markup: {
+        inline_keyboard: keybord
+      }
+    });}else{
+      bot.sendMessage(chatId, `
+❌ *No Results Found*
+──────────────
+🔍 Please check your spelling or try again.
 
+📝 Make sure you typed the title correctly, just like it appears on Google.
+`);
+
+    }
+  }}
+});
 
 
 bot.on("callback_query",(query)=>{
