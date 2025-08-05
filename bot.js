@@ -105,7 +105,7 @@ bot.on("callback_query", (query) => {
             ]
           }
         });
-      }, 2000);
+      }, 60000);
     });
   } else {
     bot.sendMessage(chatId, `
