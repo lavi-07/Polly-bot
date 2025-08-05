@@ -4,6 +4,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const fs = require("fs");
 const data = JSON.parse(fs.readFileSync("database.json", 'utf-8'));
+const content =data.map(item=>item.content).flat()
 
 const app = express();
 const token = process.env.BOT_TOKEN;
@@ -22,22 +23,26 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
 
   bot.sendMessage(chatId, `
-👋 *Welcome to MovieBot!*
+  🙏🏼 ਸਤ ਸ੍ਰੀ ਅਕਾਲ ${msg.from.first_name} ${msg.from.last_name} 
 
-🎬 You can search for any movie by typing its name below.
+  👋 Pollyflix ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!
 
-📝 *Example:*  
+  🎬 ਤੁਸੀਂ ਹੇਠਾਂ ਜਿਸ ਵੀ ਫਿਲਮ ਦਾ ਨਾਮ ਲਿਖੋਂਗੇ, ਉਹ ਲੱਭ ਸਕਦੇ ਹੋ।
+  
+  📝 ਉਦਾਹਰਨ:
+  
 \`Majhail\`  
 \`Sardaar Ji\`  
 \`Saunkan Saunkne 2\`
 
-🔍 Just send the title, and I’ll find it for you!
+🔍 ਸਿਰਫ਼ ਫਿਲਮ ਦਾ ਨਾਮ ਭੇਜੋ, ਮੈਂ ਉਹ ਤੁਹਾਡੇ ਲਈ ਲੱਭ ਲਵਾਂਗਾ!
 `, { parse_mode: "Markdown" });
 });
 
 // ✅ Message Handler
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
+  console.log(msg)
 
   if (msg.text === "/start") return; // already handled above
 
@@ -46,23 +51,23 @@ bot.on('message', (msg) => {
     return;
   }
 
-  const found = data.filter(item =>
+  const found = content.filter(item =>
     item.title.toLowerCase().includes(msg.text.toLowerCase())
   );
 
   if (found.length !== 0) {
-    const keyboard = found.map(item => [{ text: item.title, callback_data: item.title }]);
+    const keyboard = found.map(item => [{ text: item.title, callback_data: item.id }]);
     bot.sendMessage(chatId, "🎥 *Your Movies List*", {
       parse_mode: "Markdown",
       reply_markup: { inline_keyboard: keyboard }
     });
   } else {
     bot.sendMessage(chatId, `
-❌ *No Results Found*
-──────────────
-🔍 Please check your spelling or try again.
-
-📝 Make sure you typed the title correctly, just like it appears on Google.
+    ❌ ਕੋਈ ਨਤੀਜੇ ਨਹੀਂ ਮਿਲੇ
+    ──────────────
+    🔍 ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਸ਼ਬਦਾਂ ਦੀ ਜਾਂਚ ਕਰੋ ਜਾਂ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ।
+    
+    📝 ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਸੀਂ ਸਿਰਲੇਖ ਸਹੀ ਤਰ੍ਹਾਂ ਲਿਖਿਆ ਹੈ, ਬਿਲਕੁਲ ਉਸੇ ਤਰ੍ਹਾਂ ਜਿਵੇਂ ਉਹ Google 'ਤੇ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ।
 `, { parse_mode: "Markdown" });
   }
 });
@@ -70,47 +75,44 @@ bot.on('message', (msg) => {
 // ✅ Callback Query Handler
 bot.on("callback_query", (query) => {
   const chatId = query.message.chat.id;
-  const chosenTitle = query.data;
-  const video = data.find(item => item.title === chosenTitle);
+  const chosenId = query.data;
+  console.log(chosenId)
+  console.log(content)
+  const video = content.find(item => item.id == chosenId);
 
   if (video?.url) {
     bot.sendVideo(chatId, video.url, {
-      caption: `${video.title} ${video.year}\n⚠️ *Note:* This video will auto-delete in *1 minute*.\n\n📩 Forward it to any chat to save it permanently.`,
+      caption: `${video.title} 
+      
+      ⚠️ ਨੋਟ: ਇਹ ਵੀਡੀਓ ਇੱਕ ਮਿੰਟ ਵਿੱਚ ਆਪਣੇ ਆਪ ਮਿਟ ਜਾਵੇਗੀ।
+
+      📩 ਇਸਨੂੰ ਕਿਸੇ ਵੀ ਚੈਟ ਵਿੱਚ ਸਾਂਝਾ ਕਰੋ ਤਾਂ ਜੋ ਤੁਸੀਂ ਇਸਨੂੰ ਹਮੇਸ਼ਾ ਲਈ ਸੰਭਾਲ ਕੇ ਰੱਖ ਸਕੋ।`,
       parse_mode: "Markdown"
     }).then((msg) => {
       setTimeout(() => {
         bot.deleteMessage(chatId, msg.message_id);
         bot.sendMessage(chatId, `
-⚠️ *Video Expired*
+        ⚠️ ਵੀਡੀਓ ਦੀ ਮਿਆਦ ਖਤਮ ਹੋ ਗਈ ਹੈ।
 
-⏳ This video is no longer available.
+        ⏳ ਹੁਣ ਇਹ ਵੀਡੀਓ ਵੇਖਣ ਲਈ ਉਪਲਬਧ ਨਹੀਂ।
 
-🔁 Please send your request again to get a fresh copy.
+        🔁 ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਬੇਨਤੀ ਫਿਰੋਂ ਭੇਜੋ ਤਾਂ ਜੋ ਤੁਹਾਨੂੰ ਨਵੀ ਵੀਡੀਓ ਮਿਲ ਸਕੇ।
 `, {
           parse_mode: "Markdown",
           reply_markup: {
             inline_keyboard: [
-              [{ text: "🔄 Request Again", callback_data: video.title }]
+              [{ text: "🔄 ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ", callback_data: video.id }]
             ]
           }
         });
-      }, 45000);
+      }, 2000);
     });
   } else {
     bot.sendMessage(chatId, `
-❌ *Video Not Found*
-──────────────
-😕 Sorry, we couldn't find that video.
+    😕 ਮਾਫ਼ ਕਰਨਾ, ਅਸੀਂ ਇਹ ਵੀਡੀਓ ਨਹੀਂ ਲੱਭ ਸਕੇ।
 
-🔁 You can try again or pick another one from the menu.
-`, {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "📂 Open Menu", callback_data: "menu" }]
-        ]
-      }
-    });
+    🔁 ਤੁਸੀਂ ਫਿਰ ਇੱਕ ਵਾਰੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਸਕਦੇ ਹੋ।
+`);
   }
 
   bot.answerCallbackQuery(query.id);
