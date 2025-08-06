@@ -43,7 +43,6 @@ bot.onText(/\/start/, (msg) => {
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   console.log(msg)
-
   if (msg.text === "/start") return; // already handled above
 
   if (msg.video) {
