@@ -23,7 +23,7 @@ app.listen(process.env.PORT || 3000, () => {
     const chatId = msg.chat.id;
   
     bot.sendMessage(chatId, `
-    🙏🏼 ਸਤ ਸ੍ਰੀ ਅਕਾਲ ${msg.from.first_name} ${msg.from.last_name} 
+    *🙏🏼 ਸਤ ਸ੍ਰੀ ਅਕਾਲ ${msg.from.first_name} ${msg.from.last_name}*
   
     👋 Pollyflix ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!
   
@@ -45,11 +45,11 @@ app.listen(process.env.PORT || 3000, () => {
   // ✅ Message Handler
   bot.on('message', (msg) => {
     const chatId = msg.chat.id;
-    console.log(msg)
-    if (msg.text === "/start") return; // already handled above
+    if (msg.text === "/start") return; 
   
     if (msg.video) {
       console.log(msg.video.file_id);
+      console.log('Message ID:', msg.message_id);
       return;
     }
   
@@ -78,8 +78,6 @@ app.listen(process.env.PORT || 3000, () => {
   bot.on("callback_query", (query) => {
     const chatId = query.message.chat.id;
     const chosenId = query.data;
-    console.log(chosenId)
-    console.log(content)
     const video = content.find(item => item.id == chosenId);
   
     if (video?.url) {
