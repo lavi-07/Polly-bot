@@ -3,6 +3,7 @@ require('dotenv').config(); // MUST be first
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const Data =require("./db")
+const User =require('./models/user')
 
 const app = express();
 const token = process.env.BOT_TOKEN;
@@ -39,18 +40,48 @@ app.listen(process.env.PORT || 3000, () => {
   `, { parse_mode: "Markdown" });
   });
 
-  const data=await Data()
-  const content =data.flatMap(item=>item.content)
+  let data=await Data()
+  let content =data.flatMap(item=>item.content)
   
   // ✅ Message Handler
   bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
+    (async()=>{
+      const chatId = msg.chat.id;
     if (msg.text === "/start") return; 
   
-    if (msg.video) {
-      console.log(msg.video.file_id);
-      console.log('Message ID:', msg.message_id);
-      return;
+    if (msg.video&&msg.chat.id ==7816764610) {
+      const  fileId = msg.video.file_id;
+      const caption = msg.caption;
+      const document =data.find(item=>item.year ==caption.split(/\r?\n/)[0])
+      let collection = document.content.map(item=>item.title)
+      const id =document._id.toString()
+      let itemId
+      if(document.content.length !==0){
+        itemId =document.content[document.content.length-1].id
+      }else{
+        itemId  =caption.split(/\r?\n/)[0].split(0,2)
+      }
+      const title =caption.split(/\r?\n/)[1].split("_").join(" ");
+      if(!collection.includes(title)){
+        const result = await User.updateOne(
+          { _id: id },
+          {
+            $push: {
+              content: {
+                id: ++itemId, // You may want to auto-increment this
+                title: `${title} (Pollyflix)`,
+                url: fileId
+              }
+            }
+          }
+        );
+        console.log("📦 Inserted new item:", result);
+             data = await Data(); // Data() must return YourModel.find()
+          content = data.flatMap(item => item.content);
+            collection = content.map(item => item.title);
+            console.log(collection)
+      }
+      return
     }
   
     const found = content.filter(item =>
@@ -72,6 +103,8 @@ app.listen(process.env.PORT || 3000, () => {
       📝 ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਸੀਂ ਸਿਰਲੇਖ ਸਹੀ ਤਰ੍ਹਾਂ ਲਿਖਿਆ ਹੈ, ਬਿਲਕੁਲ ਉਸੇ ਤਰ੍ਹਾਂ ਜਿਵੇਂ ਉਹ Google 'ਤੇ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ।
   `, { parse_mode: "Markdown" });
     }
+    })()
+    
   });
   
   // ✅ Callback Query Handler

@@ -1,11 +1,11 @@
-// 📁 models/notes.js
-const mongoose = require("mongoose");
+const mongoose =require('mongoose');
 
-const userSchema = new mongoose.Schema({
-  id: Number,
-  title: String,
-  url: String
-});
+const notesSchema =new mongoose.Schema(
+    {    _id: false,
+        id:Number,
+        title:String,
+        url:String
+    }
+)
 
-const User = mongoose.model('User', userSchema,"Details");
-module.exports = User;
+module.exports=notesSchema;

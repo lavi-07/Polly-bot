@@ -1,6 +1,6 @@
 // 📁 main.js (or index.js or app.js)
 const mongoose = require('mongoose');
-const User = require('./models/notes');
+const User = require('./models/user');
 const mongoUrl=process.env.MONGO_URL
 // ✅ Connect to MongoDB
 mongoose.connect(mongoUrl, {
