@@ -83,9 +83,10 @@ app.listen(process.env.PORT || 3000, () => {
       }
       return
     }
+    const request =new RegExp(`\\b${msg.text}\\b`, "i");
   
     const found = content.filter(item =>
-      item.title.toLowerCase().includes(msg.text.toLowerCase())
+      request.test(item.title)
     );
   
     if (found.length !== 0) {
